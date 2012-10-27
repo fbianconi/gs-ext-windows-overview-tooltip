@@ -24,38 +24,17 @@ function enable() {
         windowClone.actor.connect('enter-event', Lang.bind(this, function(){
             _on_enter(this);
         }));
-        windowClone.actor.connect('leave-event', Lang.bind(this, function(){
-            _on_leave(this);
-        }));
+        windowClone.actor.connect('leave-event', _hideTooltip);
+        parentActor.connect('destroy', _hideTooltip);
     }
 }
 
-function _on_enter(WinOverlay){
-    if (WinOverlay._hidden){
+function _on_enter(actor){
+    if (actor._hidden){
         return;
     }
-    _showTooltip(WinOverlay);
-    // TODO check if the pointer is still inside
-}
+    _showTooltip(actor);
 
-function _on_leave(WinOverlay){
-    _hideTooltip();
-    return;
-    if (WinOverlay._hidden){
-        return;
-    }
-
-    let [cloneX,cloneY] = WinOverlay._windowClone.actor.get_transformed_position();
-    let [cloneWidth,cloneHeight] = WinOverlay._windowClone.actor.get_transformed_size();
-
-    let titleWidth = Math.floor(Math.min(WinOverlay.title.fullWidth, cloneWidth));
-    let titleX = Math.floor(cloneX + (cloneWidth - titleWidth) / 2);
-    Tweener.addTween(WinOverlay.title,{
-        width: titleWidth,
-        x: titleX,
-        time: .150,
-        transition: 'easeOutQuad'
-    });
 }
 
 let _label;
@@ -77,14 +56,15 @@ function _showTooltip(WinOverlay) {
     }else{
         _label.text = text;
     }
-
+    //TODO find a good spot for this
     let [stageX, stageY] = WinOverlay._windowClone.actor.get_transformed_position();
     let [width, height] = WinOverlay._windowClone.actor.get_transformed_size();
 
-    let y = stageY + height - 25;
+    let y = stageY + Math.round(height/2);
     let x = stageX - Math.round((_label.get_width() - width)/2);
     _label.opacity = 0;
     _label.set_position(x, y);
+
     Tweener.addTween(_label,{
         opacity: 255,
         time: TOOLTIP_LABEL_SHOW_TIME,
