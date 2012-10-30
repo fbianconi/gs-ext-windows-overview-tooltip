@@ -1,1 +1,7 @@
-{"shell-version": ["3.6"], "uuid": "Windows_Overview_Tooltips@Tornado", "name": "Windows Overview Tooltips", "description": "Shows a tooltip over windows on windows overview."}
+{
+  "shell-version": ["3.6"],
+  "uuid": "Windows_Overview_Tooltips@Tornado",
+  "name": "Windows Overview Tooltips",
+  "description": "Shows a tooltip over windows on windows overview.",
+  "url": "https://github.com/fbianconi/gs-ext-windows-overview-tooltip"
+}
