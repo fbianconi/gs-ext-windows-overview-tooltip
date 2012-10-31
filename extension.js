@@ -24,8 +24,8 @@ function enable() {
         windowClone.actor.connect('enter-event', Lang.bind(this, function(){
             _on_enter(this);
         }));
+        Main.overview.connect('hiding', _hideTooltip);
         windowClone.actor.connect('leave-event', _hideTooltip);
-        parentActor.connect('destroy', _hideTooltip);
     }
 }
 
@@ -34,7 +34,6 @@ function _on_enter(actor){
         return;
     }
     _showTooltip(actor);
-
 }
 
 let _label;
@@ -60,8 +59,8 @@ function _showTooltip(WinOverlay) {
     let [stageX, stageY] = WinOverlay._windowClone.actor.get_transformed_position();
     let [width, height] = WinOverlay._windowClone.actor.get_transformed_size();
 
-    let y = stageY + Math.round(height/2);
-    let x = stageX - Math.round((_label.get_width() - width)/2);
+    let y = Math.round(stageY + height * 4 / 5);
+    let x = Math.round(stageX - (_label.get_width() - width) / 2);
     _label.opacity = 0;
     _label.set_position(x, y);
 
