@@ -13,8 +13,8 @@ function init() {
 }
 
 function disable() {
-    _hideTooltip();
     Workspace.WindowOverlay.prototype._init = _function;
+    //WindowOverlay gets are created and deleted every time.
 }
 
 function enable() {
@@ -24,8 +24,9 @@ function enable() {
         windowClone.actor.connect('enter-event', Lang.bind(this, function(){
             _on_enter(this);
         }));
-        Main.overview.connect('hiding', _hideTooltip);
-        windowClone.actor.connect('leave-event', _hideTooltip);
+        windowClone.actor.connect('leave-event', Lang.bind(this, function(){
+            _on_leave(this);
+        }));
     }
 }
 
@@ -33,55 +34,39 @@ function _on_enter(actor){
     if (actor._hidden){
         return;
     }
-    _showTooltip(actor);
+    _repositionTitle(actor, true);
 }
 
-let _label;
-const TOOLTIP_LABEL_SHOW_TIME = 0.15;
-const TOOLTIP_LABEL_HIDE_TIME = 0.1;
-
-function _showTooltip(WinOverlay) {
-    let text = WinOverlay.title.text;
-    let should_display = WinOverlay.title.get_clutter_text().get_layout().is_ellipsized();
-
-    if (!should_display) return;
-
-    if (!_label) {
-        _label = new St.Label({
-            style_class: 'tooltip dash-label',
-            text: text
-        });
-        Main.uiGroup.add_actor(_label);
-    }else{
-        _label.text = text;
+function _on_leave(actor){
+    if (actor._hidden){
+        return;
     }
-    //TODO find a good spot for this
-    let [stageX, stageY] = WinOverlay._windowClone.actor.get_transformed_position();
-    let [width, height] = WinOverlay._windowClone.actor.get_transformed_size();
+    _repositionTitle(actor, false);
+}
 
-    let y = Math.round(stageY + height * 4 / 5);
-    let x = Math.round(stageX - (_label.get_width() - width) / 2);
-    _label.opacity = 0;
-    _label.set_position(x, y);
+function _repositionTitle(WinOverlay, showFull) {
+    let title = WinOverlay.title;
+    let text = title.text;
 
-    Tweener.addTween(_label,{
-        opacity: 255,
-        time: TOOLTIP_LABEL_SHOW_TIME,
+    //let [cloneX, cloneY, cloneWidth, cloneHeight] = WinOverlay._windowClone.slot; //doesn't exist?
+    let [cloneX, cloneY] = WinOverlay._windowClone.actor.get_transformed_position();
+    let [cloneWidth, cloneHeight] = WinOverlay._windowClone.actor.get_transformed_size();
+
+    title.set_size(-1, -1);
+    let [titleMinWidth, titleNatWidth] = title.get_preferred_width(-1);
+    let titleWidth = titleMinWidth;
+
+    if (showFull){
+        titleWidth = titleNatWidth;
+    }else{
+        titleWidth = Math.max(titleMinWidth, Math.min(titleNatWidth, cloneWidth));
+    }
+
+    let titleX = Math.round(cloneX + (cloneWidth - titleWidth) / 2);
+    Tweener.addTween(title,{
+        x: titleX,
+        width: titleWidth,
+        time: 0.1,
         transition: 'easeOutQuad',
     });
 }
-
-function _hideTooltip() {
-    if (_label){
-        Tweener.addTween(_label, {
-            opacity: 0,
-            time: TOOLTIP_LABEL_HIDE_TIME,
-            transition: 'easeOutQuad',
-            onComplete: function() {
-                Main.uiGroup.remove_actor(_label);
-                _label = null;
-            }
-        });
-    }
-}
-
