@@ -52,9 +52,12 @@ function _repositionTitle(WinOverlay, showFull) {
     let [cloneX, cloneY] = WinOverlay._windowClone.actor.get_transformed_position();
     let [cloneWidth, cloneHeight] = WinOverlay._windowClone.actor.get_transformed_size();
 
+    let titleWidth = title.width;
+    //I need this to be able to know it's preferred size
     title.set_size(-1, -1);
     let [titleMinWidth, titleNatWidth] = title.get_preferred_width(-1);
-    let titleWidth = titleMinWidth;
+    //I need this so that the animation go smooth
+    title.width = titleWidth;
 
     if (showFull){
         titleWidth = titleNatWidth;
