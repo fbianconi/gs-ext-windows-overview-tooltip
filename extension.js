@@ -48,7 +48,6 @@ function _repositionTitle(WinOverlay, showFull) {
     let title = WinOverlay.title;
     let text = title.text;
 
-    //let [cloneX, cloneY, cloneWidth, cloneHeight] = WinOverlay._windowClone.slot; //doesn't exist?
     let [cloneX, cloneY] = WinOverlay._windowClone.actor.get_transformed_position();
     let [cloneWidth, cloneHeight] = WinOverlay._windowClone.actor.get_transformed_size();
 
