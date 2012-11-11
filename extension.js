@@ -14,7 +14,6 @@ function init() {
 
 function disable() {
     Workspace.WindowOverlay.prototype._init = _function;
-    //WindowOverlay gets are created and deleted every time.
 }
 
 function enable() {
@@ -22,26 +21,18 @@ function enable() {
     Workspace.WindowOverlay.prototype._init = function(windowClone, parentActor){
         _function.apply(this, arguments);
         windowClone.actor.connect('enter-event', Lang.bind(this, function(){
-            _on_enter(this);
+            if (this._hidden){
+                return;
+            }
+            _repositionTitle(this, true);
         }));
         windowClone.actor.connect('leave-event', Lang.bind(this, function(){
-            _on_leave(this);
+            if (this._hidden){
+                return;
+            }
+            _repositionTitle(this, false);
         }));
     }
-}
-
-function _on_enter(actor){
-    if (actor._hidden){
-        return;
-    }
-    _repositionTitle(actor, true);
-}
-
-function _on_leave(actor){
-    if (actor._hidden){
-        return;
-    }
-    _repositionTitle(actor, false);
 }
 
 function _repositionTitle(WinOverlay, showFull) {
@@ -58,10 +49,20 @@ function _repositionTitle(WinOverlay, showFull) {
     //I need this so that the animation go smooth
     title.width = titleWidth;
 
+    //the problem with this approach is that it might not has the right parent on hide
     if (showFull){
         titleWidth = titleNatWidth;
+        if (WinOverlay._parentActor.contains (title)){
+            WinOverlay._parentActor.remove_child(title);
+            Main.uiGroup.add_child(title);
+        }
+        Main.uiGroup.set_child_above_sibling (title,null);
     }else{
         titleWidth = Math.max(titleMinWidth, Math.min(titleNatWidth, cloneWidth));
+        if (Main.uiGroup.contains (title)){
+            Main.uiGroup.remove_child(title);
+            WinOverlay._parentActor.add_child(title);
+        }
     }
 
     let titleX = Math.round(cloneX + (cloneWidth - titleWidth) / 2);
