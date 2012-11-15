@@ -49,21 +49,14 @@ function _repositionTitle(WinOverlay, showFull) {
     //I need this so that the animation go smooth
     title.width = titleWidth;
 
-    //the problem with this approach is that it might not has the right parent on hide
+    print (title.background);
     if (showFull){
         titleWidth = titleNatWidth;
-        if (WinOverlay._parentActor.contains (title)){
-            WinOverlay._parentActor.remove_child(title);
-            Main.uiGroup.add_child(title);
-        }
-        Main.uiGroup.set_child_above_sibling (title,null);
     }else{
         titleWidth = Math.max(titleMinWidth, Math.min(titleNatWidth, cloneWidth));
-        if (Main.uiGroup.contains (title)){
-            Main.uiGroup.remove_child(title);
-            WinOverlay._parentActor.add_child(title);
-        }
     }
+
+    title.raise_top();
 
     let titleX = Math.round(cloneX + (cloneWidth - titleWidth) / 2);
     Tweener.addTween(title,{
